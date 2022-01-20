@@ -112,12 +112,11 @@ public class NSum {
 		System.out.println("Enter a target sum:");
 		int target = input.nextInt();
 		
-		System.out.println("For n enter a number between 1 and " + A.length + ":");
 		int n;
-		
 		do {
+			System.out.println("For n enter a number between 1 and " + A.length + ":");
 			n = input.nextInt();
-		} while (n < 1 && n > A.length);
+		} while (n < 1 || n > A.length);
 		
 		findN.linearSort(A);
 		System.out.println(findN.nSum(A, target, n, 0, list));
