@@ -1,8 +1,7 @@
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Scanner;
 
 public class NSum {
-
 	/**Finding sum using 2 elements of a sorted array*/
 	private ArrayList<Integer> twoSum(int[] arr, int sum, int l, int r, ArrayList<Integer> list) {
 		while(l < r) {
@@ -31,6 +30,7 @@ public class NSum {
 			
 			if(arr[mid] == sum) {
 				list.add(sum);
+				return list;
 			} else if(arr[mid] < sum) {
 				l = mid + 1;
 			} else {
@@ -101,18 +101,27 @@ public class NSum {
 		}
 	}
 	
+	//Test run
 	public static void main(String[] args) {
-		//Test run
-		NSum n = new NSum();
+		NSum findN = new NSum();
+		Scanner input = new Scanner(System.in);
+		
 		int[] A = {90, 16, 100, 102, 6, 5, 8, 9, -6, -7, -54, 71};
-		
-		n.linearSort(A);
-		
-		System.out.println(Arrays.toString(A));
-		
 		ArrayList<Integer> list = new ArrayList<>();
-		ArrayList<Integer> sum = n.nSum(A, 130, 5, 0, list);
 		
-		System.out.println(sum);
+		System.out.println("Enter a target sum:");
+		int target = input.nextInt();
+		
+		System.out.println("For n enter a number between 1 and " + A.length + ":");
+		int n;
+		
+		do {
+			n = input.nextInt();
+		} while (n < 1 && n > A.length);
+		
+		findN.linearSort(A);
+		System.out.println(findN.nSum(A, target, n, 0, list));
+		
+		input.close();
 	}
 }
