@@ -21,20 +21,6 @@ Longest subsequence
 Buy low, sell high
 Rod cutting
 Edit string distancing (I'm sort of cheating with this because I found it in the slides but I mainly used the code as a guide)
-
-I will first provide the naive algorithm for each problem to show how slow it is.
-Then I will provide the DP version of the problem. I was going to provide two DP
-versions (including one using Arrays) for each problem but for some of them it was
-more tricky than I thought, so I couldn't get to those in time unfortunately.
-
-I also had to scrap a few more ideas since I ran out of time unfortunately. But that's on me for starting a bit late.
-Namely I wanted to try implementing matrix chain multiplication and Hamiltonian cycle. I'll probably work on this on my own later.
--}
-
-{-
-Let's start with the classic Fibonacci sequence.
-The naive way to solve this problem is to recursively compute the previous 2 values of the sequence,
-and then add them together to get the next value of the sequence.
 -}
 
 fib :: Int -> Int
@@ -148,15 +134,27 @@ prop_subseq = forAll genIntList (\i -> subseq i == subseq_dp i && subseq_dp i ==
 
 -- 2) Buy low, sell high
 buy_sell :: [Int] -> Int
-buy_sell = undefined
+buy_sell l = buy_sell_aux l minBound
+
+buy_sell_aux :: [Int] -> Int -> Int
+buy_sell_aux (h1 : (h2 : (h3 : t))) n = let n' = buy_sell_aux' (h3 : t) h1 n in buy_sell_aux (h2 : (h3 : t)) n'
+buy_sell_aux _ n = n
+
+buy_sell_aux' :: [Int] -> Int -> Int -> Int
+buy_sell_aux' [] _ n = n
+buy_sell_aux' (h : t) h' n = let max_profit = max (h - h') n in buy_sell_aux' t h' max_profit
 
 -- DP version
 buy_sell_dp :: [Int] -> Int
-buy_sell_dp = undefined
+buy_sell_dp l = let array = listArray (0, length l - 1) [i | i <- l] in 
+  buy_sell_dp_aux array [minBound, minBound] maxBound 2 (length l - 1)
 
--- DP version 2
-buy_sell_dp2 :: [Int] -> Int
-buy_sell_dp2 = undefined
+buy_sell_dp_aux :: Array Int Int -> [Int] -> Int -> Int -> Int -> Int
+buy_sell_dp_aux share_prices profits min_share i n
+  | i > n = maximum profits
+  | otherwise = let new_min = min min_share (share_prices ! (i - 2)) in
+                let profit = (share_prices ! i) - new_min in 
+                  buy_sell_dp_aux share_prices (profit : profits) new_min (i + 1) n
 
 -- Testing buy low/sell high properties:
 prop_buy_sell :: Property
@@ -214,41 +212,55 @@ string_edit (h1 : t1) (h2 : t2)
   | otherwise = minimum [string_edit t1 (h2 : t2) + 1, string_edit (h1 : t1) t2 + 1, string_edit t1 t2 + 1]
 
 string_edit' :: String -> String -> Int
-string_edit' s1 s2 = d m n 
+string_edit' s1 s2 = opt m n 
   where m = length s1
         n = length s2
         
-        d :: Int -> Int -> Int
-        d i 0 = i 
-        d 0 j = j
-        d i j
-          | s1 !! (i-1) == s2 !! (j-1) = d (i-1) (j-1)
-          | otherwise = minimum [ d (i-1) j + 1
-                                , d i (j-1) + 1
-                                , d (i-1) (j-1) + 1 ]
+        opt :: Int -> Int -> Int
+        opt i 0 = i 
+        opt 0 j = j
+        opt i j
+          | s1 !! (i - 1) == s2 !! (j - 1) = opt (i - 1) (j - 1)
+          | otherwise = minimum [opt (i - 1) j + 1, opt i (j - 1) + 1, opt (i - 1) (j - 1) + 1]
 
 -- DP version
 string_edit_dp :: String -> String -> Int 
-string_edit_dp s1 s2 = d m n
+string_edit_dp s1 s2 = opt m n
   where m = length s1
         n = length s2
 
-        d :: Int -> Int -> Int 
-        d i 0 = i
-        d 0 j = j
-        d i j
+        opt :: Int -> Int -> Int 
+        opt i 0 = i
+        opt 0 j = j
+        opt i j
           | s1 !! (i - 1) ==  s2 !! (j - 1) = ds ! (i - 1, j - 1)
-          | otherwise = minimum [ ds ! (i - 1, j) + 1
-                                , ds ! (i, j - 1) + 1
-                                , ds ! (i - 1, j - 1) + 1
-                                ]
+          | otherwise = minimum [ds ! (i - 1, j) + 1, ds ! (i, j - 1) + 1, ds ! (i - 1, j - 1) + 1]
 
-        ds = listArray bounds [d i j | (i, j) <- range bounds]
+        ds = listArray bounds [opt i j | (i, j) <- range bounds]
         bounds = ((0, 0), (m, n))
+
+-- DP version 2 (using lists)
+string_edit_dp2 :: String -> String -> Int 
+string_edit_dp2 s1 s2 = opt m n
+  where m = length s1
+        n = length s2
+
+        opt :: Int -> Int -> Int 
+        opt i 0 = i
+        opt 0 j = j
+        opt i j
+          | s1 !! (i - 1) ==  s2 !! (j - 1) = search2D list2D (i - 1) (j - 1)
+          | otherwise = minimum [search2D list2D (i - 1) j + 1, search2D list2D i (j - 1) + 1, 
+            search2D list2D (i - 1) (j - 1) + 1]
+
+        indices = [(i, j) | (i, j) <- range ((0, 0), (m, n))]
+        empty2D = build2D (0, 0) (m, n)
+        list2D = insertBuild empty2D indices opt
         
 -- Testing string editting properties:
 prop_string_edit :: Property
-prop_string_edit = forAll genString (\s -> forAll genString (\s' -> string_edit s s' == string_edit_dp s s'))
+prop_string_edit = forAll genString (\s -> forAll genString (\s' -> string_edit s s' == string_edit_dp s s'
+                                    && string_edit_dp s s' == string_edit_dp2 s s'))
 
 
 -- Some auxiliary functions:
@@ -258,6 +270,37 @@ insert_at [] _ _ _ = []
 insert_at (h : t) j i e
   | j >= i = e : t
   | otherwise = h : insert_at t (j + 1) i e
+
+-- Insert in a 2D list
+insert2D :: [[Int]] -> (Int, Int) -> Int -> [[Int]]
+insert2D l t e = insert2D_aux l t (0, 0) e
+
+insert2D_aux :: [[Int]] -> (Int, Int) -> (Int, Int) -> Int -> [[Int]]
+insert2D_aux [] _ _ _ = []
+insert2D_aux (h : t) (u1, u2) (l1, l2) e
+  | l1 > u1 = (h : t)
+  | l1 == u1 = (insert_at h l2 u2 e) : insert2D_aux t (u1, u2) (l1 + 1, l2) e
+  | otherwise = h : (insert2D_aux t (u1, u2) (l1 + 1, l2) e)
+
+-- Build an empty 1D list
+build_list :: Int -> Int -> [Int]
+build_list i n
+  | i > n = []
+  | otherwise = 0 : (build_list (i + 1) n)
+
+-- Build an empty 2D list
+build2D :: (Int, Int) -> (Int, Int) -> [[Int]]
+build2D (i, j) (m, n)
+  | i > m = []
+  | otherwise = (build_list j n) : (build2D (i + 1, j) (m, n))
+
+insertBuild :: [[Int]] -> [(Int, Int)] -> (Int -> Int -> Int) -> [[Int]]
+insertBuild l [] _ = l
+insertBuild l (h : t) f = let (i, j) = h in let new2D = insert2D l h (f i j) in insertBuild new2D t f
+
+-- Search a 2D list
+search2D :: [[Int]] -> Int -> Int -> Int
+search2D lst i j = let l = lst !! i in l !! j
 
 -- Make all the integers positive in a list of integers
 abs_lst :: [Int] -> [Int]
