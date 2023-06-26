@@ -1,5 +1,3 @@
-# Not quite done yet. Will add the finishing touches soon
-
 import pygame
 import random
 import math
@@ -20,8 +18,8 @@ class DrawInformation:
         (160, 160, 160)
     ]
 
-    FONT = pygame.font.SysFont('comicsans', 20)
-    LARGE_FONT = pygame.font.SysFont('comicsans', 30)
+    FONT = pygame.font.SysFont('calibri', 20)
+    LARGE_FONT = pygame.font.SysFont('calibri', 30)
     SIDE_PAD = 100
     TOP_PAD = 150
 
@@ -49,7 +47,7 @@ def draw(draw_info, algo, ascending):
     controls = draw_info.FONT.render("R - Reset | SPACE - Sort | A - Ascending order | D - Descending order", 1, draw_info.BLACK)
     draw_info.window.blit(controls, (draw_info.width / 2 - controls.get_width() / 2, 45))
 
-    sorting = draw_info.FONT.render("I - Insertion sort | B - Bubble sort", 1, draw_info.BLACK)
+    sorting = draw_info.FONT.render("I - Insertion sort | B - Bubble sort | S - Selection sort", 1, draw_info.BLACK)
     draw_info.window.blit(sorting, (draw_info.width / 2 - sorting.get_width() / 2, 75))
 
     draw_list(draw_info)
@@ -98,6 +96,22 @@ def bubble_sort(draw_info, ascending=True):
                 yield True
     return lst
 
+def selection_sort(draw_info, ascending=True):
+    lst = draw_info.lst
+    for i in range(len(lst)):
+        min_idx = i
+
+        for j in range(i + 1, len(lst)):
+            if (lst[j] < lst[min_idx] and ascending) or (lst[j] > lst[min_idx] and not ascending):
+                min_idx = j
+                draw_list(draw_info, {i: draw_info.GREEN, min_idx: draw_info.RED}, True)
+                yield True
+
+        lst[i], lst[min_idx] = lst[min_idx], lst[i]
+        draw_list(draw_info, {i: draw_info.GREEN, min_idx: draw_info.RED}, True)
+        yield True
+    return lst
+
 def insertion_sort(draw_info, ascending=True):
     lst = draw_info.lst
     for i in range(1, len(lst)):
@@ -133,10 +147,9 @@ def main():
     sorting_algorithm_generator = None
 
     while run:
-        clock.tick(60)
-
         if sorting:
             try:
+                clock.tick(5)
                 next(sorting_algorithm_generator)
             except StopIteration:
                 sorting = False
@@ -167,6 +180,9 @@ def main():
             elif event.key == pygame.K_b and not sorting:
                 sorting_algorithm = bubble_sort
                 sorting_algo_name = "Bubble Sort"
+            elif event.key == pygame.K_s and not sorting:
+                sorting_algorithm = selection_sort
+                sorting_algo_name = "Selection Sort"
 
     pygame.quit()
 
