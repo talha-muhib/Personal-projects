@@ -8,4 +8,4 @@ Insertion sort is a sorting algorithm that places an unsorted element at its sui
 
 Selection sort proceeds by finding the smallest (or largest, depending on sorting order) element in the unsorted sublist, exchanging (swapping) it with the leftmost unsorted element (putting it in sorted order), and moving the sublist boundaries one element to the right.
 
-All of these algorithms run in O(n^2) time on average, which is why these are typically not used for very large inputs. Better comparison sorting algorithms are merge sort or quick sort, which tend to run in O(nlg(n)) time.
+All of these algorithms run in O(n^2) time on average, which is why these are typically not used for very large inputs. Better comparison sorting algorithms are merge sort or quick sort, which tend to run in O(nlg(n)) time. However, those algorithms are not in-place.
