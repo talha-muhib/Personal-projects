@@ -1,4 +1,4 @@
-# PATH FINDING ALGORITHM VISUALIZER
+# Path Finding Algorithm Visualizer
 
 In this project we explore 4 different algorithms and the 
 visual differences in their traversals through a graph:
