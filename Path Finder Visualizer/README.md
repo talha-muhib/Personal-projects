@@ -1,5 +1,8 @@
 # Path Finding Algorithm Visualizer
 
+Credit to Tech With Tim for his Pygame tutorials:
+https://www.youtube.com/@TechWithTim
+
 In this project we explore 4 different algorithms and the 
 visual differences in their traversals through a graph:
 A*
