@@ -1,6 +1,6 @@
 # Sorting Algorithm Visualizer (In-place)
 
-Credit to Tech With Tim for his Pygame tutorials:
+Credit to Tech With Tim for his Pygame tutorials:  
 https://www.youtube.com/@TechWithTim
 
 Designed a visualizer for some in-place sorting algorithms; bubble sort, insertion sort, and selection sort. 
