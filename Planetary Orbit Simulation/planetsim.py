@@ -1,3 +1,5 @@
+#Press the SPACE key to toggle between the inner and outer planets
+
 import pygame
 import math
 pygame.init()
@@ -30,12 +32,13 @@ TIMESTEP = 3600 * 24 #1 day (timestep we'll be doing the simulation on)
 class LargeBody:
     SCALE = 200 / AU #1 AU = 100 pixels
 
-    def __init__(self, x, y, radius, color, mass):
+    def __init__(self, x, y, radius, color, mass, name):
         self.x = x
         self.y = y
         self.radius = radius
         self.color = color
         self.mass = mass
+        self.name = name
 
         #Planet's/Sun's velocity
         self.x_vel = 0
@@ -47,7 +50,7 @@ class LargeBody:
         self.orbit = [] #List of points the planet has traveled along
 
     #Drawing our large body
-    def draw(self, win):
+    def draw(self, win, scale_down):
         #Scale down the position of our planet and start at the center of the window
         x = self.x * self.SCALE + WIDTH / 2
         y = self.y * self.SCALE + HEIGHT / 2
@@ -66,11 +69,11 @@ class LargeBody:
             pygame.draw.lines(win, self.color, False, updated_points, 1)
 
         #Draw our large body
-        pygame.draw.circle(win, self.color, (x, y), self.radius)
+        pygame.draw.circle(win, self.color, (x, y), self.radius/scale_down)
 
         #If the body isn't the sun then display a planet's distance to the sun
         if not self.sun:
-            distance_text = FONT.render(f"Distance = {round(self.distance_to_sun/100)} km", 1, WHITE)
+            distance_text = FONT.render(f"{self.name}: {round(self.distance_to_sun/100)} km", 1, WHITE)
             win.blit(distance_text, (x - distance_text.get_width()/2, y + distance_text.get_height()))
 
     #Calculation the attraction between 2 bodies
@@ -119,54 +122,42 @@ class LargeBody:
 def main():
     run = True
     clock = pygame.time.Clock()
-    option = input('Type inner or outer: ')
+    outer = False
     bodies = []
     scale_down = 1
 
-    while option != "inner" and option != "outer":
-        option = input("I said type inner or outer -_-")
-
-    if option == "outer":
-        scale_down = 10
-
-    sun = LargeBody(0, 0, 40/scale_down, YELLOW, 1.98892 * 10 ** 30) # <- mass in kg
+    sun = LargeBody(0, 0, 40, YELLOW, 1.98892 * 10 ** 30, "") # <- mass in kg
     sun.sun = True
 
     #Terrestrial planets
-    mercury = LargeBody(0.387 * AU, 0, 6/scale_down, GREY, 3.3 * 10 ** 23)
+    mercury = LargeBody(0.387 * AU, 0, 6, GREY, 3.3 * 10 ** 23, "Mercury")
     mercury.y_vel = -47.4 * 1000 #Each planet needs a starting force in the y direction (in km/s)
 
-    venus = LargeBody(0.723 * AU, 0, 11/scale_down, WHITE, 4.8685 * 10 ** 24)
+    venus = LargeBody(0.723 * AU, 0, 11, WHITE, 4.8685 * 10 ** 24, "Venus")
     venus.y_vel = -35.2 * 1000 
 
-    earth = LargeBody(-1 * AU, 0, 12/scale_down, BLUE, 5.9742 * 10 ** 24)
+    earth = LargeBody(-1 * AU, 0, 12, BLUE, 5.9742 * 10 ** 24, "Earth")
     earth.y_vel = 29.783 * 1000 
 
-    mars = LargeBody(-1.524 * AU, 0, 9/scale_down, RED, 6.39 * 10 ** 23)
+    mars = LargeBody(-1.524 * AU, 0, 9, RED, 6.39 * 10 ** 23, "Mars")
     mars.y_vel = 24.077 * 1000 
 
     #Gas giants
-    jupiter = LargeBody(5.2 * AU, 0,30/scale_down, LIGHT_BROWN, 3.3 * 10 ** 23)
+    jupiter = LargeBody(5.2 * AU, 0,30, LIGHT_BROWN, 1.898 * 10 ** 27, "Jupiter")
     jupiter.y_vel = -13.07 * 1000 
 
-    saturn = LargeBody(-9.538 * AU, 0, 25/scale_down, BROWN, 4.8685 * 10 ** 24)
+    saturn = LargeBody(-9.538 * AU, 0, 25, BROWN, 5.863 * 10 ** 26, "Saturn")
     saturn.y_vel = 9.69 * 1000 
 
-    uranus = LargeBody(19.8 * AU, 0, 20/scale_down, TURQUOISE, 5.9742 * 10 ** 24)
+    uranus = LargeBody(19.8 * AU, 0, 20, TURQUOISE, 8.681 * 10 ** 25, "Uranus")
     uranus.y_vel = -6.81 * 1000 
 
-    neptune = LargeBody(-30 * AU, 0, 18/scale_down, DARK_BLUE, 6.39 * 10 ** 23)
+    neptune = LargeBody(-30 * AU, 0, 18, DARK_BLUE, 1.024 * 10 ** 26, "Neptune")
     neptune.y_vel = 5.43 * 1000 
 
-    #List of large bodies
-    if option == "outer":
-        bodies = [sun, earth, mars, mercury, venus, jupiter, saturn, uranus, neptune]
-
-        for b in bodies:
-            b.SCALE /= 20
-
-    else:
-        bodies = [sun, earth, mars, mercury, venus]
+    #Default scale 
+    default_scale = earth.SCALE
+    smaller_scale = default_scale / 20
 
     """
     We need the loop to keep running so the display 
@@ -179,11 +170,26 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT: #When the user hits the close button
                 run = False
-            
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    outer = not outer
+
+        if outer:
+            scale_down = 10
+            bodies = [sun, mercury, venus, earth, mars, jupiter, saturn, uranus, neptune]
+            for b in bodies:
+                b.SCALE = smaller_scale
+        else:
+            scale_down = 1
+            bodies = [sun, mercury, venus, earth, mars]
+            for b in bodies:
+                b.SCALE = default_scale
+        
         #Drawing out our large bodies
         for b in bodies:
             b.update_position(bodies) #Update the position of the bodies
-            b.draw(WIN)
+            b.draw(WIN, scale_down)
         pygame.display.update() #Update the display with the last events
 
     pygame.quit() #Close our window
