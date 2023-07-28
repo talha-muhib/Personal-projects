@@ -3,7 +3,9 @@ import random
 import math
 pygame.init()
 
+#Class for filling in our display window
 class DrawInformation:
+    #Colors we will use
     BLACK = 0, 0, 0
     WHITE = 255, 255, 255
     RED = 255, 0, 0
@@ -12,17 +14,22 @@ class DrawInformation:
     GREY = 128, 128, 128
     BG_COLOR = WHITE
 
+    #Creating a pattern of grey colored rectangles
     GRADIENTS = [
         GREY,
         (190, 190, 190),
         (160, 160, 160)
     ]
 
+    #Fonts
     FONT = pygame.font.SysFont('calibri', 20)
     LARGE_FONT = pygame.font.SysFont('calibri', 30)
+
+    #Padding the sides of the display window
     SIDE_PAD = 100
     TOP_PAD = 150
 
+    #Initialize
     def __init__(self, width, height, lst):
         self.width = width
         self.height = height
@@ -30,6 +37,7 @@ class DrawInformation:
         pygame.display.set_caption("Sorting Algorithm Visualizer")
         self.set_lst(lst)
 
+    #Setting up the properties of the list
     def set_lst(self, lst):
         self.lst = lst
         self.max_val = max(lst)
@@ -38,6 +46,7 @@ class DrawInformation:
         self.block_height = math.floor((self.height - self.TOP_PAD) / (self.max_val - self.min_val))
         self.start_x = self.SIDE_PAD // 2
 
+#Drawing the info on the display window
 def draw(draw_info, algo, ascending):
     draw_info.window.fill(draw_info.BG_COLOR)
 
@@ -53,6 +62,7 @@ def draw(draw_info, algo, ascending):
     draw_list(draw_info)
     pygame.display.update()
 
+#Generate a random list
 def generate_starting_list(n, min_val, max_val):
     lst = []
 
@@ -62,6 +72,7 @@ def generate_starting_list(n, min_val, max_val):
 
     return lst
 
+#Draw the list elements from our generated list
 def draw_list(draw_info, color_positions={}, clear_bg=False):
     lst = draw_info.lst
 
@@ -83,6 +94,7 @@ def draw_list(draw_info, color_positions={}, clear_bg=False):
     if clear_bg:
         pygame.display.update()
 
+#Bubble sort algorithm
 def bubble_sort(draw_info, ascending=True):
     lst = draw_info.lst
     for i in range(len(lst) - 1):
@@ -96,6 +108,7 @@ def bubble_sort(draw_info, ascending=True):
                 yield True
     return lst
 
+#Selection sort algorithm
 def selection_sort(draw_info, ascending=True):
     lst = draw_info.lst
     for i in range(len(lst)):
@@ -112,6 +125,7 @@ def selection_sort(draw_info, ascending=True):
         yield True
     return lst
 
+#Insertion sort algorithm
 def insertion_sort(draw_info, ascending=True):
     lst = draw_info.lst
     for i in range(1, len(lst)):
@@ -131,6 +145,7 @@ def insertion_sort(draw_info, ascending=True):
             yield True
     return lst
 
+#Main function
 def main():
     run = True
     clock = pygame.time.Clock()
@@ -146,6 +161,7 @@ def main():
     sorting_algo_name = "Bubble Sort"
     sorting_algorithm_generator = None
 
+    #Keep the display window open
     while run:
         if sorting:
             try:
@@ -157,12 +173,13 @@ def main():
             draw(draw_info, sorting_algo_name, ascending)
 
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == pygame.QUIT: #Until the user hits the close button
                 run = False
             
             if event.type != pygame.KEYDOWN:
                 continue
 
+            #Various key controls
             if event.key == pygame.K_r:
                 lst = generate_starting_list(n, min_val, max_val)
                 draw_info.set_lst(lst)
@@ -184,7 +201,8 @@ def main():
                 sorting_algorithm = selection_sort
                 sorting_algo_name = "Selection Sort"
 
-    pygame.quit()
+    pygame.quit() #Close the window
 
+#Calling our main function
 if __name__ == "__main__":
     main()
