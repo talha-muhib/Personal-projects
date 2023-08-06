@@ -182,7 +182,7 @@ def prim(draw, win, g, nodes, edges):
             nodes[edge[1]].set_color(GREEN)
             if not (edge[0] == 0 and edge[1] == 0):
                 process_edge(edges, edge[1], edge[0], GREEN)
-                print(f"Adding edge ({edge[0]}, {edge[1]})") #Print out the current edge
+                print(f"Adding edge ({edge[0]}, {edge[1]}) with cost {g[edge[0]][edge[1]]}") #Print out the current edge
         else:
             process_edge(edges, edge[0], edge[1], RED) #Any visited vertex should have its edge set to red
 
@@ -226,7 +226,7 @@ def kruskal(draw, win, g, nodes, edges):
 
         #If the endpoints of our edge do not share a set, then add the edge to our tree
         if v1 != v2:
-            print(f"Adding edge ({edge[0]}, {edge[1]})") #Print out the current edge
+            print(f"Adding edge ({edge[0]}, {edge[1]}) with cost {edge[2]}") #Print out the current edge
             uf.union(v1, v2)
             g[edge[0]][edge[1]] = g[edge[1]][edge[0]] = edge[2]
             min_cost += edge[2] #Update the min cost
@@ -242,6 +242,9 @@ def kruskal(draw, win, g, nodes, edges):
         draw()
         yield True
     
+    #Set vertex 0 to purple by default
+    nodes[0].set_color(PURPLE)
+
     #Cost of our MST
     print(f"Cost of our MST is {min_cost}")
 
