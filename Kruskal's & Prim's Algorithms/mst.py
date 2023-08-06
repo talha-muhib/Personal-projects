@@ -27,9 +27,9 @@ pygame.display.set_caption("MST Algorithms (Kruskal vs. Prim)")
 #Colors we will use
 RED = (195, 0, 0)
 GREEN = (0, 195, 0)
-BLUE = (0, 0, 255)
+BLUE = (0, 100, 255)
 WHITE = (255, 255, 255)
-PURPLE = (128, 0, 128)
+PURPLE = (178, 0, 178)
 YELLOW = (175, 175, 0)
 
 #Fonts
@@ -66,7 +66,7 @@ class Edge:
 
     #Drawing our edges with costs
     def draw(self, win, p1, p2, cost):
-        pygame.draw.lines(win, self.color, True, [(p1.x, p1.y), (p2.x, p2.y)], 1)
+        pygame.draw.lines(win, self.color, True, [(p1.x, p1.y), (p2.x, p2.y)], 2)
         cost_text = FONT.render(f"{cost}", 1, self.color)
         win.blit(cost_text, (abs(p1.x + p2.x)/2, abs(p1.y + p2.y)/2))
 
