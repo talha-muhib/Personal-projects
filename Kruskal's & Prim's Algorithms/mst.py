@@ -38,19 +38,22 @@ TITLE_FONT = pygame.font.SysFont('calibri', 40)
 
 #Drawing our nodes
 class Node:
-    def __init__(self, x, y, color, n):
+    def __init__(self, x, y, color, n, label):
         self.x = x
         self.y = y
         self.color = color
         self.radius = round(150/n) #Shrinking the radius as # of nodes increase
+        self.label = label #Node label
 
     #Setting color of our nodes
     def set_color(self, color):
         self.color = color
 
-    #Drawing our nodes
+    #Drawing our labeled nodes
     def draw(self, win):
         pygame.draw.circle(win, self.color, (self.x, self.y), self.radius)
+        label = FONT.render(f"{self.label}", 1, WHITE)
+        win.blit(label, (self.x - label.get_width()/2, self.y - label.get_height()/2))
 
 #Drawing our edges
 class Edge:
@@ -73,7 +76,7 @@ def make_nodes(n):
     for i in range(n): #Arranging the nodes in a circle
         x = WIDTH/2 + 200 * math.cos(2 * math.pi * i/n)
         y = HEIGHT/2 + 200 * math.sin(2 * math.pi * i/n)
-        node_list.append(Node(x, y, BLUE, n))
+        node_list.append(Node(x, y, BLUE, n, i))
     
     #Return the list
     return node_list
@@ -84,12 +87,17 @@ def make_edges(g):
     for i in range(len(g)):
         for j in range(i + 1, len(g)):
             if g[i][j] != 0:
-                #Double-layering the edges because of some rendering issues
                 edge_dict[(i, j)] = Edge(BLUE)
-                edge_dict[(j, i)] = Edge(BLUE)
     
     #Return the list
     return edge_dict
+
+#Processing an edge while an algorithm runs
+def process_edge(edges, i, j, color):
+    if (i, j) in edges:
+        edges[(i, j)].set_color(color)
+    else:
+        edges[(j, i)].set_color(color)
 
 #Generating a graph with edge costs
 def generate_graph(n):
@@ -164,20 +172,19 @@ def prim(draw, win, g, nodes, edges):
             min_cost += g[edge[0]][edge[1]] #Update the min cost
 
             #Add all neighbors of our current vertex to the priority queue
-            for i in range(len(g[edge[1]])):
+            for i in range(len(g)):
                 if g[edge[1]][i] != 0:
-                    pq.push((edge[1], i), g[edge[1]][i])
-
                     #Any vertex that we already visited should have the edge set to red
                     if i in visited:
-                        edges[(edge[1], i)].set_color(RED)
-                        edges[(i, edge[1])].set_color(RED)
+                        process_edge(edges, edge[1], i, RED)
+                        continue
+                    pq.push((edge[1], i), g[edge[1]][i])
         
             #Set newly visited vertices and their edges to green
             nodes[edge[1]].set_color(GREEN)
             if not (edge[0] == 0 and edge[1] == 0):
-                edges[(edge[1], edge[0])].set_color(GREEN)
-                edges[(edge[0], edge[1])].set_color(GREEN)
+                process_edge(edges, edge[1], edge[0], GREEN)
+                print(f"Adding edge ({edge[0]}, {edge[1]})") #Print out the current edge
 
         #Yield and the display window update
         draw()
@@ -219,18 +226,17 @@ def kruskal(draw, win, g, nodes, edges):
 
         #If the endpoints of our edge do not share a set, then add the edge to our tree
         if v1 != v2:
+            print(f"Adding edge ({edge[0]}, {edge[1]})") #Print out the current edge
             uf.union(v1, v2)
             g[edge[0]][edge[1]] = g[edge[1]][edge[0]] = edge[2]
             min_cost += edge[2] #Update the min cost
 
-            #If an edge doesn't form a cycle, change the vertices and the edge to green
-            edges[(edge[1], edge[0])].set_color(PURPLE)
-            edges[(edge[0], edge[1])].set_color(PURPLE)
+            #If an edge doesn't form a cycle, change the vertices and the edge to purple
+            process_edge(edges, edge[0], edge[1], PURPLE)
             nodes[edge[1]].set_color(PURPLE)
             nodes[edge[0]].set_color(PURPLE)
         else:
-            edges[(edge[1], edge[0])].set_color(YELLOW) #Change to red otherwise
-            edges[(edge[0], edge[1])].set_color(YELLOW)
+            process_edge(edges, edge[1], edge[0], YELLOW) #Change to yellow otherwise
         
         #Yield and the display window update
         draw()
