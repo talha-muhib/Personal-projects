@@ -174,9 +174,7 @@ def prim(draw, win, g, nodes, edges):
             #Add all neighbors of our current vertex to the priority queue
             for i in range(len(g)):
                 if g[edge[1]][i] != 0:
-                    #Any vertex that we already visited should have the edge set to red
-                    if i in visited:
-                        process_edge(edges, edge[1], i, RED)
+                    if i in visited: #If we visited a neighbor then don't add it again
                         continue
                     pq.push((edge[1], i), g[edge[1]][i])
         
@@ -185,6 +183,8 @@ def prim(draw, win, g, nodes, edges):
             if not (edge[0] == 0 and edge[1] == 0):
                 process_edge(edges, edge[1], edge[0], GREEN)
                 print(f"Adding edge ({edge[0]}, {edge[1]})") #Print out the current edge
+        else:
+            process_edge(edges, edge[0], edge[1], RED) #Any visited vertex should have its edge set to red
 
         #Yield and the display window update
         draw()
