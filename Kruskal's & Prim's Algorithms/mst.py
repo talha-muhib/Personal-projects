@@ -108,8 +108,8 @@ def generate_graph(n):
     #Update the edges with random costs
     for i in range(n):
         for j in range(i + 1, n):
-            random_val = round(random.random() * 10)
-            if math.floor(random_val / 3) != 0: #Adding this to make the graph more sparse
+            random_val = round(random.random() * 12)
+            if math.floor(random_val / 4) != 0: #Adding this to make the graph more sparse
                 g[i][j] = g[j][i] = random_val
 
     #Return our new graph
@@ -208,7 +208,7 @@ def kruskal(draw, win, g, nodes, edges):
     for i in range(len(g)):
         for j in range(i + 1, len(g)):
             if g[i][j] != 0:
-                pq.push((i, j, g[i][j]), g[i][j])
+                pq.push((i, j), g[i][j])
 
     #While the priority queue still has edges
     while not pq.isEmpty():
@@ -226,10 +226,9 @@ def kruskal(draw, win, g, nodes, edges):
 
         #If the endpoints of our edge do not share a set, then add the edge to our tree
         if v1 != v2:
-            print(f"Adding edge ({edge[0]}, {edge[1]}) with cost {edge[2]}") #Print out the current edge
+            print(f"Adding edge ({edge[0]}, {edge[1]}) with cost {g[edge[0]][edge[1]]}") #Print out the current edge
             uf.union(v1, v2)
-            g[edge[0]][edge[1]] = g[edge[1]][edge[0]] = edge[2]
-            min_cost += edge[2] #Update the min cost
+            min_cost += g[edge[0]][edge[1]] #Update the min cost
 
             #If an edge doesn't form a cycle, change the vertices and the edge to purple
             process_edge(edges, edge[0], edge[1], PURPLE)
@@ -242,8 +241,9 @@ def kruskal(draw, win, g, nodes, edges):
         draw()
         yield True
     
-    #Set vertex 0 to purple by default
-    nodes[0].set_color(PURPLE)
+    #Set vertex 0 to purple by default if the minimum cost is still 0
+    if min_cost == 0:
+        nodes[0].set_color(PURPLE)
 
     #Cost of our MST
     print(f"Cost of our MST is {min_cost}")
