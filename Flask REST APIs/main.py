@@ -25,6 +25,9 @@ class VideoModel(db.Model):
     def __repr__(self):
         return f"Video(name = {self.name}, views = {self.views}, likes = {self.likes})"
 
+#Create our database (Comment out this line after running main once, to avoid overwriting your entire database)
+db.create_all()
+
 #Make a new request parser object and automatically parse through the request being sent
 video_put_args = reqparse.RequestParser()
 """
