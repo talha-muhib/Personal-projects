@@ -1,5 +1,5 @@
 # ML Basics
-I was following a series of tutorials by NeuralNine on basic ML algorithms, and I made a small project to identify handwritten digits from 1-10.  
+I was following a series of tutorials by NeuralNine on basic ML algorithms, and I made a small classic project to identify handwritten digits from 1-10.  
 Code can be found in neural.py.  
 
 Playlist I was following:  
