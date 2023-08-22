@@ -7,5 +7,5 @@ A data structure called Union-Find is used to detect cycles while running the al
 Notes on Union-Find:  
 https://www.cs.umd.edu/class/fall2022/cmsc420-0201/Lects/lect04-union-find.pdf  
 
-Note mst.py and mst2.ipynb:  
+Note on mst.py and mst2.ipynb:  
 Both of those files contain the exact same code. mst2 is a Jupyter file, so if you prefer that then run that file instead.
