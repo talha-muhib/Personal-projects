@@ -23,9 +23,10 @@ def mod_inverse(e, phi):
     raise ValueError("Multiplicative inverse doesn't exist")
 
 def main():
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 4:
         raise Exception("No message passed in")
 
+    #Change these ranges as you wish and see what happens
     p, q = gen_prime(1000, 9000), gen_prime(1000, 9000)
     while q == p:
         q = gen_prime(1000, 9000)
