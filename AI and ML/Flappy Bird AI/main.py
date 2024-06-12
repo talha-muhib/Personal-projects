@@ -149,13 +149,15 @@ class Base:
         win.blit(self.IMG, (self.x2, self.y))
 
 
-def draw_window(win, bird, pipes, base, score):
+def draw_window(win, birds, pipes, base, score):
     win.blit(BG, (0, -250))
 
     for pipe in pipes:
         pipe.draw(win)
     base.draw(win)
-    bird.draw(win)
+
+    for bird in birds:
+        bird.draw(win)
 
     text = STAT_FONT.render("Score: " + str(score), 1, (255, 255, 255))
     win.blit(text, (WIDTH - 10 - text.get_width(), 10))
@@ -164,6 +166,16 @@ def draw_window(win, bird, pipes, base, score):
 
 def main(genomes, config):
     flappies = []
+    nets = []
+    ge = []
+
+    for _, g in genomes:
+        net = neat.nn.FeedForwardNetwork.create(g, config)
+        nets.append(net)
+        flappies.append(Flappy(150, 300))
+        g.fitness = 0
+        ge.append(g)
+
     base = Base(530)
     pipes = [Pipe(550)]
     run = True
@@ -175,13 +187,37 @@ def main(genomes, config):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
+                pygame.quit()
+                quit()
         
+        pipe_ind = 0
+        if len(flappies) > 0:
+            if len(pipes) > 0 and flappies[0].x > pipes[0].x + pipes[0].PIPE_TOP.get_width():
+                pipe_ind = 1
+        else:
+            run = False
+            break
+
+        for x, flappy in enumerate(flappies):
+            flappy.move()
+            ge[x].fitness += 0.1
+
+            output = nets[x].activate((flappy.y,
+                                       abs(flappy.y - pipes[pipe_ind].height),
+                                       abs(flappy.y - pipes[pipe_ind].bottom)))
+            
+            if output[0] > 0.5:
+                flappy.jump()
+
         rem = []
         add_pipe = False
         for pipe in pipes:
-            for flappy in flappies:
+            for x, flappy in enumerate(flappies):
                 if pipe.collide(flappy):
-                    pass
+                    ge[x].fitness -= 1
+                    flappies.pop(x)
+                    nets.pop(x)
+                    ge.pop(x)
                 
                 if not pipe.passed and pipe.x < flappy.x:
                     pipe.passed = True
@@ -194,21 +230,22 @@ def main(genomes, config):
 
         if add_pipe:
             score += 1
+            for g in ge:
+                g.fitness += 5
             pipes.append(Pipe(550))
 
         for r in rem:
             pipes.remove(r)
 
-        for flappy in flappies:
-            if flappy.y + flappy.img.get_height() > 530:
-                pass
+        for x, flappy in enumerate(flappies):
+            if flappy.y + flappy.img.get_height() > 530 or flappy.y < 0:
+                flappies.pop(x)
+                nets.pop(x)
+                ge.pop(x)
 
         base.move()
 
-        draw_window(win, flappy, pipes, base, score)
-            
-    pygame.quit()
-    quit()
+        draw_window(win, flappies, pipes, base, score)
 
 
 def run(config_path):
